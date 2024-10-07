@@ -6,6 +6,7 @@ import com.haedal.spring.bootcamp.dto.response.UserDetailResponseDto;
 import com.haedal.spring.bootcamp.dto.response.UserSimpleResponseDto;
 //import haedal.Bootcamp2024_2.repository.FollowRepository;
 //import haedal.Bootcamp2024_2.repository.PostRepository;
+import com.haedal.spring.bootcamp.repository.PostRepository;
 import com.haedal.spring.bootcamp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,15 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ImageService imageService;
+    private final PostRepository postRepository;
+
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ImageService imageService, PostRepository postRepository) {
         this.userRepository = userRepository;
+        this.imageService = imageService;
+        this.postRepository = postRepository;
     }
 
     public UserSimpleResponseDto saveUser(User newUser) {
@@ -34,11 +40,14 @@ public class UserService {
     }
 
     public UserSimpleResponseDto convertUserToSimpleDto(User currentUser, User targetUser) {
+        String imageUrl = targetUser.getImageUrl();
+        String imageData = imageService.encodeImageToBase64(System.getProperty("user.dir") + "/src/main/resources/static/" + imageUrl);
+
         return new UserSimpleResponseDto(
                 currentUser.getId(),
                 currentUser.getUsername(),
                 currentUser.getName(),
-                null,
+                imageData,
                 false
         );
     }
@@ -89,14 +98,17 @@ public class UserService {
     }
 
     public UserDetailResponseDto convertUserToDetailDto(User currentUser, User targetUser) {
+        String imageUrl = targetUser.getImageUrl();
+        String imageData = imageService.encodeImageToBase64(System.getProperty("user.dir") + "/src/main/resources/static/" + imageUrl);
+
         return new UserDetailResponseDto(
                 targetUser.getId(),
                 targetUser.getUsername(),
                 targetUser.getName(),
-                null,
+                imageData,
                 false,
                 targetUser.getBio(),
-                targetUser.getJoinedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm")),
+                targetUser.getJoinedAt().format(    DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm")),
                 0L,
                 0L,
                 0L
